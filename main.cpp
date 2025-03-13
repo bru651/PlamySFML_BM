@@ -26,7 +26,11 @@ int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<
         for (int y = 0; y < size; y++) {
             n = oilNew[x][y];
             if (n<6&&n!=4) oilOld[x][y]=false;
-            else { oilOld[x][y] = true; d += 1; }
+            else { 
+                oilOld[x][y] = true; 
+                d += 1;
+            }
+            oilNew[x][y] = 0;
         }
     }
     return d;
@@ -44,8 +48,10 @@ int main()
         for (int y = 0; y < size; y++) {
             if (x == 0 || y == 0 || x == size - 1 || y == size - 1) smear.push_back(false);    // Puste krañce
             else {
-                int seed = (x - y) ^ 2;
-                if ((std::rand() % 601) - (seed) < 250) { smear.push_back(true); density[0] += 1;}
+                //int seed = (x - y) ^ 2 - std::abs(y - x);
+                if ((std::rand() % 1001) < 500) { 
+                    smear.push_back(true); 
+                    density[0] += 1;}
                 else smear.push_back(false);
             }
         }
@@ -71,10 +77,14 @@ int main()
                 if (event.key.code == sf::Keyboard::Escape) {    // Close program
                     window.close();
                 }
-                if (event.key.code == sf::Keyboard::K) {    // Wypisz gêstoœci w czasie
+                if (event.key.code == sf::Keyboard::I) {    // Wypisz gêstoœci w czasie
                     for (int i = 0; i < density.size(); i++) {
                         std::cout << ", " << density[i];
                     }
+                    std::cout<<std::endl;
+                }
+                if (event.key.code == sf::Keyboard::K) {    // Iloœæ iteracji
+                    std::cout << "Krok nr: " << density.size() << std::endl;
                 }
             }
         }
