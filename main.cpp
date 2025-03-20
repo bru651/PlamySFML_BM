@@ -7,13 +7,19 @@
 int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<int>>& oilNew) {
     int size = oilOld.size();   // Za³o¿enie ¿e tablica ma kszta³t kwadratu
     //std::vector<std::vector<bool>> oilNew(size);
+    int rnx, rny;       // Prawdziwe s¹siedztwa
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
-            if (x==0||y==0||x==size-1||y==size-1) oilNew[x][y] = -9;    // Puste krañce
-            else if (oilOld[x][y]) {
+            if (oilOld[x][y]) {
                 for (int nx = -1; nx < 2; nx++) {
                     for (int ny = -1; ny < 2; ny++) {
-                        oilNew[x + nx][y + ny] += 1;
+                        rnx = nx;
+                        rny = ny;
+                        if (x == 0 && nx == -1)rnx == size - 1;
+                        if (x == size - 1 && nx == 1)rnx == -rnx;
+                        if (y == 0 && ny == -1)rny == size - 1;
+                        if (y == size - 1 && ny == 1)rny == -rny;
+                        oilNew[x + rnx][y + rny] += 1;
                     }
                 }
             }
