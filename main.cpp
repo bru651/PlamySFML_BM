@@ -13,7 +13,7 @@ int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<
             else if (oilOld[x][y]) {
                 for (int nx = -1; nx < 2; nx++) {
                     for (int ny = -1; ny < 2; ny++) {
-                        oilNew[x + nx][y + ny] += 1;
+                        if(nx!=0&&ny!=0) oilNew[x + nx][y + ny] += 1;
                     }
                 }
             }
@@ -25,11 +25,11 @@ int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
             n = oilNew[x][y];
-            if (n<6&&n!=4) oilOld[x][y]=false;
-            else { 
-                oilOld[x][y] = true; 
-                d += 1;
+            if (n==3) oilOld[x][y]=true;
+            else if (n!=2) { 
+                oilOld[x][y] = false; 
             }
+            if (oilOld[x][y] == true) d+=1;
             oilNew[x][y] = 0;
         }
     }
@@ -39,8 +39,8 @@ int main()
 {
     std::srand(std::time({}));
     bool pause = true;
-    int size = 200;
-    float blocksize = 4.f;
+    int size = 102;
+    float blocksize = 8.f;
     std::vector<int> density(1,0);
     std::vector<std::vector<bool>> oil;
     for (int x = 0; x < size; x++) {
@@ -58,7 +58,7 @@ int main()
         oil.push_back(smear);
     }
     std::vector<std::vector<int>> oilNew(size,std::vector<int>(size,0));
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Plamy");
+    sf::RenderWindow window(sf::VideoMode(816, 816), "Plamy");
     window.setFramerateLimit(30);
     sf::RectangleShape shape(sf::Vector2f(blocksize, blocksize));
     shape.setFillColor(sf::Color::Green);
