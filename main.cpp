@@ -15,10 +15,11 @@ int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<
                     for (int ny = -1; ny < 2; ny++) {
                         rnx = nx;
                         rny = ny;
-                        if (x == 0 && nx == -1)rnx == size - 1;
-                        if (x == size - 1 && nx == 1)rnx == -rnx;
-                        if (y == 0 && ny == -1)rny == size - 1;
-                        if (y == size - 1 && ny == 1)rny == -rny;
+                        if (x == 0 && nx == -1)rnx = size - 1;
+                        if (x == size - 1 && nx == 1)rnx = -(size-1);
+                        if (y == 0 && ny == -1)rny = size - 1;
+                        if (y == size - 1 && ny == 1)rny = -(size - 1);
+                        //std::cout << "rnx: " << rnx<< " rny: " << rny << std::endl;
                         oilNew[x + rnx][y + rny] += 1;
                     }
                 }
@@ -52,14 +53,12 @@ int main()
     for (int x = 0; x < size; x++) {
         std::vector<bool> smear;
         for (int y = 0; y < size; y++) {
-            if (x == 0 || y == 0 || x == size - 1 || y == size - 1) smear.push_back(false);    // Puste krañce
-            else {
-                //int seed = (x - y) ^ 2 - std::abs(y - x);
-                if ((std::rand() % 1001) < 500) { 
-                    smear.push_back(true); 
-                    density[0] += 1;}
-                else smear.push_back(false);
+            //int seed = (x - y) ^ 2 - std::abs(y - x);
+            if ((std::rand() % 1001) < 500) {
+                smear.push_back(true);
+                density[0] += 1;
             }
+            else smear.push_back(false);
         }
         oil.push_back(smear);
     }
@@ -101,7 +100,12 @@ int main()
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 if (oil[x][y]) {
-                    //std::cout << "X: "<< x<<" Y: "<<y << std::endl;
+                    //shape.setFillColor(sf::Color::Green);
+                    shape.setPosition(sf::Vector2f(blocksize * x, blocksize * y));
+                    window.draw(shape);
+                }
+                /*else {
+                    shape.setFillColor(sf::Color::Blue);
                     shape.setPosition(sf::Vector2f(blocksize * x, blocksize * y));
                     window.draw(shape);
                 }//*/
