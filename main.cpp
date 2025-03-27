@@ -1,24 +1,26 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
-#include <cstdlib>
+//#include <cstdlib>
+//#include <cmath>
 #include <ctime>
 #include <iostream>
 int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<int>>& oilNew) {
     int size = oilOld.size();   // Za³o¿enie ¿e tablica ma kszta³t kwadratu
-    //std::vector<std::vector<bool>> oilNew(size);
+    int rnx, rny;
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
-            if (x==0||y==0||x==size-1||y==size-1) oilNew[x][y] = -9;    // Puste krañce
-            else if (oilOld[x][y]) {
+            if (oilOld[x][y]) {
                 for (int nx = -1; nx < 2; nx++) {
                     for (int ny = -1; ny < 2; ny++) {
-                        if(nx!=0&&ny!=0) oilNew[x + nx][y + ny] += 1;
+                        rnx = x + nx;
+                        rny = y + ny;
+                        if (rnx  < 0 || rny < 0 || rnx > size - 1 || rny > size - 1) continue;    // Krañce
+                        if(!(nx==0&&ny==0)) oilNew[rnx][rny] += 1;
                     }
                 }
             }
         }
-        //oilNew[x] = smear;
     }
     int n;
     int d = 0;
@@ -35,34 +37,47 @@ int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<
     }
     return d;
 }
+
+int generateRandom(std::vector<std::vector<bool>>& oil, int size, int probability) {
+    int d = 0;
+    for (int x = 0; x < size; x++) {
+        for (int y = 0; y < size; y++) {
+            if ((std::rand() % 1001) < probability) {
+                oil[x][y] = true;
+                d += 1;
+            }
+            else oil[x][y] = false;
+        }
+    }
+    return d;
+}
+
 int main()
 {
     std::srand(std::time({}));
+    // Ustawienia
+    int displaySize = 800;
     bool pause = true;
-    int size = 102;
-    float blocksize = 8.f;
-    std::vector<int> density(1,0);
-    std::vector<std::vector<bool>> oil;
-    for (int x = 0; x < size; x++) {
-        std::vector<bool> smear;
-        for (int y = 0; y < size; y++) {
-            if (x == 0 || y == 0 || x == size - 1 || y == size - 1) smear.push_back(false);    // Puste krañce
-            else {
-                //int seed = (x - y) ^ 2 - std::abs(y - x);
-                if ((std::rand() % 1001) < 500) { 
-                    smear.push_back(true); 
-                    density[0] += 1;}
-                else smear.push_back(false);
-            }
-        }
-        oil.push_back(smear);
-    }
+    int iterations = 1;     // Iloœæ iteracji
+    int curIteration = 1;     // Obecna iteracja
+    int probability = 500;  // Od 0 do 1000
+    bool display = true; // Czy ma rysowaæ gry
+    int size = 100;     // Wymiar tablicy
+    float blocksize = static_cast<float>(displaySize) / size;  // Graficzna wielkoœæ pola
+
+    // Zbiorniki
+    std::vector<int> density;
+    std::vector<std::vector<bool>> oil(size, std::vector<bool>(size, false));
     std::vector<std::vector<int>> oilNew(size,std::vector<int>(size,0));
-    sf::RenderWindow window(sf::VideoMode(816, 816), "Plamy");
+    std::vector<int> densityFinal;
+
+    // Grafika
+    sf::RenderWindow window(sf::VideoMode(displaySize, displaySize), "Plamy");
     window.setFramerateLimit(30);
     sf::RectangleShape shape(sf::Vector2f(blocksize, blocksize));
     shape.setFillColor(sf::Color::Green);
 
+    density.push_back(generateRandom(oil, size, probability));
     while (window.isOpen())
     {
         sf::Event event;
@@ -81,16 +96,57 @@ int main()
                     for (int i = 0; i < density.size(); i++) {
                         std::cout << ", " << density[i];
                     }
-                    std::cout<<std::endl;
+                    std::cout << std::endl;
                 }
                 if (event.key.code == sf::Keyboard::K) {    // Iloœæ iteracji
                     std::cout << "Krok nr: " << density.size() << std::endl;
                 }
+                if (event.key.code == sf::Keyboard::R) {    // Iloœæ iteracji
+                    display = !display;
+                }
             }
         }
         if (!pause) {
-            density.push_back(StainUpdate(oil,oilNew));
+            density.push_back(StainUpdate(oil, oilNew));
         }
+        if (density.size() == 1000) { 
+            if (iterations<2) {
+                pause = true;
+                std::cout << "Krok nr: " << density.size() << std::endl;
+                for (int i = 0; i < density.size(); i++) {
+                    std::cout << ", " << density[i];
+                }
+                std::cout << std::endl;
+                window.close();
+            }
+            else {  // Powtarzanie symulacji
+                densityFinal.push_back(density[density.size() - 1]);
+                if (iterations>curIteration) {
+                    std::vector<int> density;
+                    density.push_back(generateRandom(oil, size, probability));
+                    curIteration += 1;
+                }
+                else {
+                    // Policz œredni¹
+                    int suma = 0;
+                    for (int i=0; i < densityFinal.size(); i++) {
+                        suma += densityFinal[i];
+                    }
+                    float mean = static_cast<float>(suma)/ densityFinal.size();
+                    // Policz odchylenie standardowe
+                    float devSum = 0;
+                    for (int i = 0; i < densityFinal.size(); i++) {
+                        devSum += std::pow(static_cast<float>(densityFinal[i])-mean,2);
+                    }
+                    float standardDev = std::sqrt(devSum/(densityFinal.size()-1));
+                    // Policz b³¹d standardowy
+                    float standardError = devSum/ std::sqrt(densityFinal.size());
+                    window.close();
+                }
+            }
+        }
+
+        if (display) {
         window.clear();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -102,8 +158,9 @@ int main()
                 //else std::cout << "Nay" << std::endl;
             }
         }
-        
+
         window.display();
+    }
     }
 
     return 0;
