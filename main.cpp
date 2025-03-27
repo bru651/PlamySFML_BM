@@ -58,11 +58,12 @@ int main()
     // Ustawienia
     int displaySize = 800;
     bool pause = true;
-    int iterations = 1;     // Iloœæ iteracji
+    int iterations = 100;     // Iloœæ iteracji
     int curIteration = 1;     // Obecna iteracja
     int probability = 500;  // Od 0 do 1000
     bool display = true; // Czy ma rysowaæ gry
     int size = 100;     // Wymiar tablicy
+    int space = size * size;
     float blocksize = static_cast<float>(displaySize) / size;  // Graficzna wielkoœæ pola
 
     // Zbiorniki
@@ -73,7 +74,7 @@ int main()
 
     // Grafika
     sf::RenderWindow window(sf::VideoMode(displaySize, displaySize), "Plamy");
-    window.setFramerateLimit(30);
+    //window.setFramerateLimit(30);
     sf::RectangleShape shape(sf::Vector2f(blocksize, blocksize));
     shape.setFillColor(sf::Color::Green);
 
@@ -112,17 +113,18 @@ int main()
         if (density.size() == 1000) { 
             if (iterations<2) {
                 pause = true;
-                std::cout << "Krok nr: " << density.size() << std::endl;
+                /*std::cout << "Krok nr: " << density.size() << std::endl;
                 for (int i = 0; i < density.size(); i++) {
                     std::cout << ", " << density[i];
                 }
                 std::cout << std::endl;
-                window.close();
+                window.close();//*/
             }
             else {  // Powtarzanie symulacji
                 densityFinal.push_back(density[density.size() - 1]);
+                density.clear();
+                std::cout << "Iteracja: " << curIteration << std::endl;
                 if (iterations>curIteration) {
-                    std::vector<int> density;
                     density.push_back(generateRandom(oil, size, probability));
                     curIteration += 1;
                 }
@@ -133,34 +135,43 @@ int main()
                         suma += densityFinal[i];
                     }
                     float mean = static_cast<float>(suma)/ densityFinal.size();
+                    float meanDensity = mean / space;
                     // Policz odchylenie standardowe
                     float devSum = 0;
+                    float i_dens;
                     for (int i = 0; i < densityFinal.size(); i++) {
-                        devSum += std::pow(static_cast<float>(densityFinal[i])-mean,2);
+                        i_dens = static_cast<float>(densityFinal[i]) / space;
+                        devSum += std::pow(i_dens - meanDensity,2);
                     }
                     float standardDev = std::sqrt(devSum/(densityFinal.size()-1));
                     // Policz b³¹d standardowy
                     float standardError = devSum/ std::sqrt(densityFinal.size());
+                    // Napisz raport
+                    std::cout << "Rozmiar gry: " << size << std::endl;
+                    std::cout << "Œrednia: " << meanDensity << std::endl;
+                    std::cout << "Odchylenie standardowe: " << standardDev << std::endl;
+                    std::cout << "B³¹d standardowy: " << standardError << std::endl;
+
                     window.close();
                 }
             }
         }
 
         if (display) {
-        window.clear();
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                if (oil[x][y]) {
-                    //std::cout << "X: "<< x<<" Y: "<<y << std::endl;
-                    shape.setPosition(sf::Vector2f(blocksize * x, blocksize * y));
-                    window.draw(shape);
-                }//*/
-                //else std::cout << "Nay" << std::endl;
+            window.clear();
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    if (oil[x][y]) {
+                        //std::cout << "X: "<< x<<" Y: "<<y << std::endl;
+                        shape.setPosition(sf::Vector2f(blocksize * x, blocksize * y));
+                        window.draw(shape);
+                    }
+                    //else std::cout << "Nay" << std::endl;
+                }
             }
-        }
 
-        window.display();
-    }
+            window.display();
+        }//*/
     }
 
     return 0;
