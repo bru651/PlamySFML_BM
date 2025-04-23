@@ -15,8 +15,17 @@ int StainUpdate(std::vector<std::vector<bool>>& oilOld, std::vector<std::vector<
                     for (int ny = -1; ny < 2; ny++) {
                         rnx = x + nx;
                         rny = y + ny;
-                        if (rnx  < 0 || rny < 0 || rnx > size - 1 || rny > size - 1) continue;    // Krañce
-                        if(!(nx==0&&ny==0)) oilNew[rnx][rny] += 1;
+                        //if (rnx  < 0 || rny < 0 || rnx > size - 1 || rny > size - 1) continue;    // Krañce
+                        
+
+                        //
+                        if (rnx < 0)rnx = size - 1;
+                        if (rnx > size - 1)rnx = 0;
+                        if (rny < 0)rny = size - 1;
+                        if (rny > size - 1)rny = 0;
+                        //std::cout << "rnx: " << rnx<< " rny: " << rny << std::endl;
+                        if (!(nx == 0 && ny == 0)) oilNew[rnx][rny] += 1;
+                        //
                     }
                 }
             }
@@ -61,8 +70,8 @@ int main()
     int iterations = 100;     // Iloœæ iteracji
     int curIteration = 1;     // Obecna iteracja
     int probability = 500;  // Od 0 do 1000
-    bool display = true; // Czy ma rysowaæ gry
-    int size = 100;     // Wymiar tablicy
+    bool display = false; // Czy ma rysowaæ gry
+    int size = 200;     // Wymiar tablicy
     int space = size * size;
     float blocksize = static_cast<float>(displaySize) / size;  // Graficzna wielkoœæ pola
 
